@@ -5,12 +5,11 @@
 #include <vector>
 
 struct mul {
-	int op_1, op_2;
 	mul(int op1, int op2) : op_1(op1), op_2(op2){}
 	mul(int op1, int op2, bool enable) : op_1(op1), op_2(op2), m_enabled(enable) {}
-	void set_enabled(bool b) { m_enabled = b; }
-
 	int operator()() const { return m_enabled ? (op_1 * op_2) : 0; }
+	private:
+	int op_1, op_2;
 	bool m_enabled = true;
 };
 
@@ -24,20 +23,20 @@ void get_vectors2(const std::string& file, std::vector<mul>& reports) {
 	{
 		std::regex r(R"(mul\(\d+,\d+\)|do\(\)|don't\(\))");
 		for (std::smatch sm; std::regex_search(line, sm, r);) {
-			auto number = sm.str();
-			if (number == "do()") {
+			auto mtch = sm.str();
+			if (mtch == "do()") {
 				enabled = true;
 				line = sm.suffix();
 				continue;
 			}
-			if(number == "don't()") {
+			if(mtch == "don't()") {
 				enabled = false;
 				line = sm.suffix();
 				continue;
 			}
 			std::smatch nums;
 			std::regex r2("(\\d+),(\\d+)");
-			std::regex_search(number, nums, r2);
+			std::regex_search(mtch, nums, r2);
 			reports.emplace_back(std::atoi(nums[1].str().c_str()), std::atoi(nums[2].str().c_str()),enabled);
 			line = sm.suffix();
 		}
@@ -52,10 +51,10 @@ void get_vectors1(const std::string& file, std::vector<mul>& reports) {
 	while (std::getline(ifs, line)) {
 		std::regex r(R"(mul\(\d+,\d+\))");
 		for (std::smatch sm; std::regex_search(line, sm, r);) {
-			auto number = sm.str();
+			auto numbers = sm.str();
 			std::smatch nums;
 			std::regex r2("(\\d+),(\\d+)");
-			std::regex_search(number, nums, r2);
+			std::regex_search(numbers, nums, r2);
 			reports.emplace_back(std::atoi(nums[1].str().c_str()), std::atoi(nums[2].str().c_str()));
 			line = sm.suffix();
 		}
