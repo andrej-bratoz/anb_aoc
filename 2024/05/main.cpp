@@ -5,6 +5,8 @@
 #include <vector>
 #include <math.h>
 
+
+// thank you, SO [https://stackoverflow.com/a/46931770/732348]
 std::vector<std::string> split(std::string s, std::string delimiter) {
 	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string token;
@@ -35,6 +37,8 @@ struct node {
 		}
 	}
 	int id() const { return _id; }
+	const std::vector<node>& after() const { return _after; }
+	const std::vector<node>& before() const { return _before; }
 
 	private:
 	int _id;
@@ -59,9 +63,60 @@ struct book {
 		_pages = pages;
 	}
 
-	bool is_valid() const {
-		
+	void swap_page(int p1, int p2) {
+		int val1 = _pages[p1];
+		int val2 = _pages[p2];
+		_pages[p1] = val2;
+		_pages[p2] = val1;
 	}
+
+	bool is_valid() {
+		for(int i = 0; i < _pages.size(); i++) {
+			auto nde = find(_pages[i]);
+			for(int j = 0; j < i; j++) { // check if no before number appears in after for the node
+				for(const auto num : nde.after()) {
+					if (num == _pages[j]) return false;
+				}
+			}
+			for (int j = i+1; j < _pages.size(); j++) { // check if no before number appears in after for the node
+				for (const auto num : nde.before()) {
+					if (num == _pages[j]) return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	// Assuming valid order is always possible
+	// Brute force
+	void reorder_valid() {
+		beginning:
+		if (is_valid()) {
+			return;
+		}
+		for (int i = 0; i < _pages.size(); i++) {
+			auto nde = find(_pages[i]);
+			for (int j = 0; j < i; j++) { // check if no before number appears in after for the node
+				for (const auto num : nde.after()) {
+					if (num == _pages[j]) {
+						swap_page(i, j);
+						goto beginning;
+					}
+				}
+			}
+			for (int j = i + 1; j < _pages.size(); j++) { // check if no before number appears in after for the node
+				for (const auto num : nde.before()) {
+					if (num == _pages[j]) {
+						swap_page(i, j);
+						goto beginning;
+					}
+				}
+			}
+		}
+	}
+
+	const std::vector<int>& pages() const { return _pages; }
+
 
 	private:
 	void create_node_if_required(int id) {
@@ -73,7 +128,8 @@ struct book {
 	node& find(int id) {
 		const auto result = std::find(_order_rules.begin(), _order_rules.end(), id);
 		return *result;
-	} 
+	}
+
 	std::vector<node> _order_rules;
 	std::vector<int> _pages;
 };
@@ -135,10 +191,26 @@ void write_sln(const std::string& name, const std::string& sln) {
 void part_1() {
 	std::vector<book> books;
 	load_data("input_day5.txt", books);
+	int sum = 0;
+	for(auto& book : books) {
+		if(book.is_valid()) {
+			sum += book.pages()[(book.pages().size() - 1) / 2];
+		}
+	}
+	write_sln("solution_day5_p1.txt", std::to_string(sum));
 }
 
 void part_2() {
-	
+	std::vector<book> books;
+	load_data("input_day5.txt", books);
+	int sum = 0;
+	for (auto& book : books) {
+		if (!book.is_valid()) {
+			book.reorder_valid();
+			sum += book.pages()[(book.pages().size() - 1) / 2];
+		}
+	}
+	write_sln("solution_day5_p2.txt", std::to_string(sum));
 }
 
 int main() {
