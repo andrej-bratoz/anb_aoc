@@ -95,7 +95,6 @@ struct guard {
 		return false;
 	}
 
-	// wrong logic
 	int number_of_cycles() {
 		int total = 0;
 		for(int _x = 0; _x < _matrix._rows[0].length(); _x++) {
@@ -104,7 +103,6 @@ struct guard {
 					_matrix.set(_x, _y);
 					if(try_detect_cycle()) {
 						total++;
-						//_matrix.print();
 					}
 					total_steps = 1;
 					_matrix = _orig_mx;
