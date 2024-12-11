@@ -331,16 +331,16 @@ struct stone_line {
 
     unsigned long long blink_ultra_fast(int blinks, std::map<unsigned long long, unsigned long long> map) {
         for (int i = 0; i < blinks; i++) {
-            std::map<unsigned long long, unsigned long long> newStoneMap;
+            std::map<unsigned long long, unsigned long long> new_map;
             for (const auto& kvp : map) {
                 auto stone = kvp.first;
                 auto count = kvp.second;
                 auto blink_map = blink(stone);
                 for (const auto& ns : blink_map) {
-                    newStoneMap[ns] = newStoneMap[ns] + count;
+                    new_map[ns] = new_map[ns] + count;
                 }
             }
-            map = newStoneMap;
+            map = new_map;
         }
 
         unsigned long long total = 0;
