@@ -302,54 +302,13 @@ struct stone_line {
         return ll.size;
 	}
 
-    unsigned long long blink_faster(int amount, const std::vector<unsigned long long>& stones_as_ll) {
-        LinkedList ll;
-        for (const auto& i : stones_as_ll) {
-            ll.insertAtEnd(i);
-        }
-        for (int blink = 0; blink < amount; blink++) {
-            //ll.display();
-            ll.reset_current_node();
-            while (ll.current_node()) {
-                bool any_rule_applied = false;
-                auto node = ll.current_node();
-                if (node->data == 0) {
-                    node->data = 1;
-                    any_rule_applied = true;
-                }
-                if (numlen(node->data) % 2 == 0) {
-                    any_rule_applied = true;
-
-                    unsigned long long first_num = 0;
-                    unsigned long long second_num = 0;
-                    halve(node->data, first_num, second_num);
-                    node->data = first_num;
-                    Node* next = new Node;
-                    next->data = second_num;
-                    Node* after = node->next;
-                    node->next = next;
-                    next->next = after;
-                    ll.size++;
-                    ll.set_current_node(next);
-                }
-
-                if (!any_rule_applied) {
-                    node->data = node->data * 2024;
-                }
-                ll.move_next();
-            }
-        }
-        return ll.size;
-    }
-
     unsigned long long  blink_many_times(int amount) {
         unsigned long long total = 0;
-	    for(const auto& stone : this->stones_as_string) {
-            int depth = 0;
-			std::cout << "Handling: " << stone << "\n";
-            total+=  blink_faster_item(amount, 0,atoll(stone.c_str()), {});
+        std::map<unsigned long long, unsigned long long> map;
+        for(const auto& stone : this->stones_as_string) {
+            map.insert({ atoll(stone.c_str()), 1 });
 	    }
-        return total;
+        return blink_ultra_fast(amount, map);
     }
 
     void print_list(std::vector<unsigned long long>& tail) {
@@ -370,38 +329,24 @@ struct stone_line {
         return { stone * 2024 };
     }
 
-    unsigned long long blink_faster_item2(int blinks, std::multimap<int, unsigned long long> map) {
-          }
-
-    unsigned long long blink_faster_item(int blinks, int start_point, unsigned long long num_to_handle, std::multimap<int, unsigned long long> map) {
-        unsigned long long total = 0;
-        for (int blink = start_point; blink < blinks; blink++) {
-            bool any_rule_applied = false;
-            if (num_to_handle == 0) {
-                num_to_handle = 1;
-                any_rule_applied = true;
-            }
-            else if (numlen(num_to_handle) % 2 == 0) {
-                any_rule_applied = true;
-                unsigned long long first_num = 0;
-                unsigned long long second_num = 0;
-                halve(num_to_handle, first_num, second_num);
-                num_to_handle = first_num;
-                if (blink < 74) {
-                    map.insert({ blink + 1,second_num });
+    unsigned long long blink_ultra_fast(int blinks, std::map<unsigned long long, unsigned long long> map) {
+        for (int i = 0; i < blinks; i++) {
+            std::map<unsigned long long, unsigned long long> newStoneMap;
+            for (const auto& kvp : map) {
+                auto stone = kvp.first;
+                auto count = kvp.second;
+                auto blink_map = blink(stone);
+                for (const auto& ns : blink_map) {
+                    newStoneMap[ns] = newStoneMap[ns] + count;
                 }
             }
+            map = newStoneMap;
+        }
 
-            if (!any_rule_applied) {
-                num_to_handle = num_to_handle * 2024;
-            }
+        unsigned long long total = 0;
+        for (const auto& kvp : map) {
+            total += kvp.second;
         }
-        if(!map.empty()) {
-			for(const auto& kvp : map) {
-                total += blink_faster_item(blinks, kvp.first, kvp.second, {});
-            }
-        }
-        total += 1;
         return total;
     }
 };
