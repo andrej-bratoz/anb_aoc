@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 day = sys.argv[1]
 
@@ -85,3 +86,6 @@ if not os.path.exists(full_path):
         """.format(day)
     )
     write_file(os.path.join(full_path, "main.cpp"), MAIN_CPP)
+
+os.chdir(os.path.join(full_path,"_sln"))
+os.system("cmake ..")
